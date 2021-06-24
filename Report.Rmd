@@ -1,0 +1,81 @@
+---
+title: "Report - Pharma"
+author: "Author"
+date: "23/06/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Report : Data Analysis of the NanoString assay.
+
+## The Goal
+
+Please insert here an appropriate purpose for your analysis of the Raw data.
+
+## Quality control
+
+the Heat Map showing positive and negative control genes in columns and samples in rows.
+
+```{r echo = FALSE, message = FALSE, include=FALSE}
+
+library(nanostringr)
+library(gplots)
+library(RColorBrewer)
+
+reacc <- read_rcc("csdata")
+reacc
+
+b = as.data.frame(reacc$exp)
+
+a <- reacc$raw
+a <- as.data.frame(a)
+dt = a[a$Code.Class == "Negative" | a$Code.Class == "Positive",]
+
+# Rename rows by Name
+rownames(dt) <- dt$Name
+
+# Subset the dataset
+dt <- subset(dt,select=-c(Name,Accession, Code.Class))
+
+# Create the matrix input
+input = as.matrix(dt)
+
+# Colors
+condition_colors <- rainbow(ncol(input), start = 0, end = .3)
+```
+
+```{r echo = FALSE, message = FALSE}
+
+# The heatmap
+heatmap(input, col=bluered(20), cexRow=1, cexCol=1, margins = c(20,13), ColSideColors=condition_colors, scale="row")
+```
+
+## Data Analysis
+
+Boxplots of summary statistics for the two genes of interest : MCL1 and CXCL1
+
+```{r pressure, echo=FALSE}
+# Prepare data before data analysis
+baseline = c("GSM2055824_02_4355_PD_mRNA", "GSM2055826_04_4078_PD_mRNA", "GSM2055828_06_3746_PD_mRNA", "GSM2055830_08_3790_PD_mRNA", "GSM2055832_10_4050_PD_mRNA")
+posttraitement = c("GSM2055823_01_4353_PD_mRNA", "GSM2055825_03_3366_PD_mRNA", "GSM2055827_05_4846_PD_mRNA", "GSM2055829_07_3760_PD_mRNA", "GSM2055831_09_4436_PD_mRNA")
+
+# data manipulation: transform columns indicating file's names to row values.
+library(reshape2)
+data = a[a$Name == "MCL1" | a$Name == "CXCL1",]
+data = melt(data = data, id=c("Code.Class","Name", "Accession"))
+# Add column : Timepoint
+data = transform(data, Timepoint = ifelse(is.element(variable,baseline) == 1, "Baseline", "Post traitement"))
+
+# BOXPLOT
+boxplot(value~Timepoint*Name,data=data, main="Boxplots", xlab="TimePoint", ylab="Value")
+```
+
+The summary statistics show in the boxplots
+
+```{r echo=FALSE}
+# SUMMARY
+tapply(data$value, data$Name, summary)
+```
