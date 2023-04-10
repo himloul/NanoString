@@ -1,3 +1,12 @@
+'''
+This is a Python script with a GUI (Graphical User Interface) that allows the user to browse and select three paths for a PDF file, 
+an output report file, and an OCR text file. 
+After selecting the files, the user can trigger the OCR (Optical Character Recognition) process by clicking the "ocr-recognition" button. 
+If the process is successful, a completion message with the time taken for the process is displayed. 
+If it fails, an error message is displayed. 
+The script also includes a function that sets the path for a "no-hitfiled" info file if it exists.
+'''
+
 #!/usr/bin/env python
 import datetime
 import os
